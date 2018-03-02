@@ -1,6 +1,6 @@
 CC = g++
 ODIR = obj
-PROG = main
+PROG = gmake
 CXXFLAG = -lboost_system -lboost_filesystem
 
 $(PROG) : $(ODIR) $(ODIR)/$(PROG).o
@@ -18,7 +18,7 @@ $(ODIR)/Vertex.o : ./Graph/src/Vertex.cpp ./Graph/include/Vertex.h $(ODIR)/Node.
 $(ODIR)/Graph.o : ./Graph/src/Graph.cpp ./Graph/include/Graph.h $(ODIR)/Vertex.o $(ODIR)/Utils.o
 	$(CC) -c $< -o $@
 
-$(ODIR)/$(PROG).o : ./main.cpp $(ODIR)/Graph.o
+$(ODIR)/$(PROG).o : ./gmake.cpp $(ODIR)/Graph.o
 	$(CC) -c $< -o $@
 
 $(ODIR) :

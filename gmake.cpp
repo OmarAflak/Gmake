@@ -194,14 +194,24 @@ stringstream generateMakefile(const Graph& graph, string entryPoint){
     return ss;
 }
 
-int main(int argc, char const *argv[]) {
-    string entry = argv[1];
-    Graph graph = getDependencyGraph(".");
-    stringstream makefile = generateMakefile(graph, entry);
+void help(){
+    cout << "gmake [entry]" << endl;
+    cout << "\t[entry] : file containing the main() function" << endl;
+}
 
-    std::ofstream out("Makefile");
-    out << makefile.str() << endl;
-    out.close();
+int main(int argc, char const *argv[]) {
+    if(argc==2){
+        string entry = argv[1];
+        Graph graph = getDependencyGraph(".");
+        stringstream makefile = generateMakefile(graph, entry);
+
+        std::ofstream out("Makefile");
+        out << makefile.str() << endl;
+        out.close();
+    }
+    else{
+        help();
+    }
 
     return 0;
 }
