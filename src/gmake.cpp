@@ -168,7 +168,7 @@ stringstream generateMakefile(const Graph& graph, string entryPoint){
     Node* entryNode = NULL;
     vector<Node*> allNodes = graph.getNodes();
     for(int i=0 ; i<allNodes.size() ; i++){
-        if(path(allNodes[i]->getName()).filename()==entryFilename){
+        if(endsWith(allNodes[i]->getName(), entryPoint)){
             entryNode = allNodes[i];
             break;
         }
