@@ -28,3 +28,7 @@ $(ODIR) :
 clean :
 	if [ -d $(ODIR) ]; then rm $(ODIR) -r; fi
 	if [ -f $(PROG) ]; then rm $(PROG); fi
+
+.PHONY: install
+install :
+	sudo mv $(PROG) /bin
