@@ -4,7 +4,7 @@
 #include <sstream>
 #include <boost/filesystem.hpp>
 
-#include "Graph/include/Graph.h"
+#include "../Graph/include/Graph.h"
 
 using namespace std;
 using namespace boost::filesystem;
@@ -186,7 +186,7 @@ stringstream generateMakefile(const Graph& graph, string entryPoint){
     ss << "\tif [ ! -d $(ODIR) ]; then mkdir $(ODIR); fi" << endl << endl;
 
     // clean
-    ss << ".PHONY: clean" << endl;
+    ss << ".PHONY : clean" << endl;
     ss << "clean :" << endl;
     ss << "\tif [ -d $(ODIR) ]; then rm $(ODIR) -r; fi" << endl;
     ss << "\tif [ -f $(PROG) ]; then rm $(PROG); fi" << endl;

@@ -18,17 +18,17 @@ $(ODIR)/Vertex.o : ./Graph/src/Vertex.cpp ./Graph/include/Vertex.h $(ODIR)/Node.
 $(ODIR)/Graph.o : ./Graph/src/Graph.cpp ./Graph/include/Graph.h $(ODIR)/Vertex.o $(ODIR)/Utils.o
 	$(CC) -c $< -o $@
 
-$(ODIR)/$(PROG).o : ./gmake.cpp $(ODIR)/Graph.o
+$(ODIR)/$(PROG).o : ./src/gmake.cpp $(ODIR)/Graph.o
 	$(CC) -c $< -o $@
 
 $(ODIR) :
 	if [ ! -d $(ODIR) ]; then mkdir $(ODIR); fi
 
-.PHONY: clean
+.PHONY : clean
 clean :
 	if [ -d $(ODIR) ]; then rm $(ODIR) -r; fi
 	if [ -f $(PROG) ]; then rm $(PROG); fi
 
-.PHONY: install
+.PHONY : install
 install :
-	sudo mv $(PROG) /bin
+	sudo mv gmake /bin
