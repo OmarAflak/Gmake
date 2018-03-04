@@ -50,7 +50,7 @@ bool readDeps(const char* filename, std::vector<std::string> &deps){
     return false;
 }
 
-std::vector<path> listdir(std::string dir){
+std::vector<path> listdir(const std::string& dir){
     path p(dir);
     directory_iterator end_itr;
     std::vector<path> list;
@@ -68,7 +68,7 @@ std::vector<path> listdir(std::string dir){
     return list;
 }
 
-int findPath(const std::vector<path> &files, std::string dep){
+int findPath(const std::vector<path> &files, const std::string &dep){
     for(int i=0 ; i<files.size() ; i++){
         if(files[i].filename().string()==dep){
             return i;
@@ -77,7 +77,7 @@ int findPath(const std::vector<path> &files, std::string dep){
     return -1;
 }
 
-Graph getDependencyGraph(std::string directory){
+Graph getDependencyGraph(const std::string& directory){
     Graph graph;
     std::vector<path> files = listdir(directory);
     for(int i=0 ; i<files.size() ; i++){
@@ -122,7 +122,7 @@ std::vector<Node*> getOrderedDependencies(const Graph &graph){
     return ordered;
 }
 
-std::stringstream generateMakefile(const Graph& graph, std::string entryPoint){
+std::stringstream generateMakefile(const Graph& graph, const std::string& entryPoint){
     path entryFilename = path(entryPoint).filename();
     std::vector<Node*> headers = getOrderedDependencies(graph);
     std::stringstream ss;
@@ -200,20 +200,18 @@ void help(){
 }
 
 int main(int argc, char const *argv[]) {
-    // if(argc==2){
-    //     std::string entry = argv[1];
-    //     Graph graph = getDependencyGraph(".");
-    //     std::stringstream makefile = generateMakefile(graph, entry);
-    //
-    //     std::ofstream out("Makefile");
-    //     out << makefile.str() << std::endl;
-    //     out.close();
-    // }
-    // else{
-    //     help();
-    // }
+    if(argc==2){
+        std::string entry = argv[1];
+        Graph graph = getDependencyGraph(".");
+        std::stringstream makefile = generateMakefile(graph, entry);
 
-    Graph graph = getDependencyGraph(".");
-    graph.print();
+        std::ofstream out("Makefile");
+        out << makefile.str() << std::endl;
+        out.close();
+    }
+    else{
+        help();
+    }
+    
     return 0;
 }
