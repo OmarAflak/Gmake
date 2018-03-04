@@ -76,9 +76,9 @@ std::vector<path> listdir(const std::string& dir){
     return list;
 }
 
-int findPath(const std::vector<path> &files, const std::string &dep){
-    for(int i=0 ; i<files.size() ; i++){
-        if(files[i].filename().string()==dep){
+int findPath(const std::vector<path> &paths, const std::string &dep){
+    for(int i=0 ; i<paths.size() ; i++){
+        if(paths[i].filename().string()==dep){
             return i;
         }
     }
@@ -87,18 +87,18 @@ int findPath(const std::vector<path> &files, const std::string &dep){
 
 Graph getDependencyGraph(const std::string& directory){
     Graph graph;
-    std::vector<path> files = listdir(directory);
-    for(int i=0 ; i<files.size() ; i++){
+    std::vector<path> paths = listdir(directory);
+    for(const auto& file : paths){
         std::vector<std::string> dependencies;
-        std::string filepath = files[i].string();
-        std::string extension = files[i].extension().string();
+        std::string filepath = file.string();
+        std::string extension = file.extension().string();
         if(extension==".cpp" || extension==".h"){
             if(readDeps(filepath.c_str(), dependencies)){
-                for(int i=0 ; i<dependencies.size() ; i++){
-                    path p(dependencies[i]);
-                    int index = findPath(files, p.filename().string());
+                for(const auto& dep : dependencies){
+                    path p(dep);
+                    int index = findPath(paths, p.filename().string());
                     if(index!=-1){
-                        graph.connect(filepath, files[index].string());
+                        graph.connect(filepath, paths[index].string());
                     }
                 }
             }
@@ -111,20 +111,20 @@ std::vector<Node*> getOrderedDependencies(const Graph &graph){
     std::vector<Node*> nodes = graph.getNodes();
     std::vector<Node*> headers;
 
-    for(int i=0 ; i<nodes.size() ; i++){
-        if(endsWith(nodes[i]->getName(), ".h")){
-            headers.push_back(nodes[i]);
+    for(const auto& node : nodes){
+        if(endsWith(node->getName(), ".h")){
+            headers.push_back(node);
         }
     }
 
     std::sort(headers.begin(), headers.end(), less_connections());
-
     return headers;
 }
 
 std::stringstream generateMakefile(const Graph& graph, const std::string& entryPoint){
     path entryFilename = path(entryPoint).filename();
     std::vector<Node*> headers = getOrderedDependencies(graph);
+    std::vector<Node*> nodes = graph.getNodes();
     std::stringstream ss;
 
     // variables
@@ -137,25 +137,23 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
     // executable
     ss << "$(PROG) : $(ODIR) $(ODIR)/$(PROG).o" << std::endl;
     ss << "\t$(CC) -o $@ $(ODIR)/$(PROG).o ";
-    for(int i=0 ; i<headers.size() ; i++){
-        ss << "$(ODIR)/" << path(headers[i]->getName()).stem().string() << ".o ";
+    for(const auto& header : headers){
+        ss << "$(ODIR)/" << path(header->getName()).stem().string() << ".o ";
     }
     ss << "$(CXXFLAG)" << std::endl << std::endl;
 
     // dependencies
-    for(int i=0 ; i<headers.size() ; i++){
-        Node* header = headers[i];
+    for(const auto& header : headers){
         std::string file = path(header->getName()).stem().string();
         std::string cppName = file + ".cpp";
 
-        std::vector<Node*> all = graph.getNodes();
-        for(int j=0 ; j<all.size() ; j++){
-            if(path(all[j]->getName()).filename().string()==cppName){
+        for(const auto& node : nodes){
+            if(path(node->getName()).filename().string()==cppName){
                 std::vector<Node*> deps = graph.getOutConnections(header->getName());
                 ss << "$(ODIR)/" << file << ".o" << " : ";
-                ss << all[j]->getName() << " " << header->getName() << " ";
-                for(int k=0 ; k<deps.size() ; k++){
-                    ss << "$(ODIR)/" << path(deps[k]->getName()).stem().string() << ".o ";
+                ss << node->getName() << " " << header->getName() << " ";
+                for(const auto& dependency : deps){
+                    ss << "$(ODIR)/" << path(dependency->getName()).stem().string() << ".o ";
                 }
                 ss << std::endl;
                 ss << "\t$(CC) -c $< -o $@" << std::endl << std::endl;
@@ -166,17 +164,16 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
 
     // entry point
     Node* entryNode = NULL;
-    std::vector<Node*> allNodes = graph.getNodes();
-    for(int i=0 ; i<allNodes.size() ; i++){
-        if(endsWith(allNodes[i]->getName(), entryPoint)){
-            entryNode = allNodes[i];
+    for(const auto& node : nodes){
+        if(endsWith(node->getName(), entryPoint)){
+            entryNode = node;
             break;
         }
     }
     std::vector<Node*> entryDeps = graph.getOutConnections(entryNode->getName());
     ss << "$(ODIR)/$(PROG).o : " << entryNode->getName() << " ";
-    for(int i=0 ; i<entryDeps.size() ; i++){
-        ss << "$(ODIR)/" << path(entryDeps[i]->getName()).stem().string() << ".o ";
+    for(const auto& dep : entryDeps){
+        ss << "$(ODIR)/" << path(dep->getName()).stem().string() << ".o ";
     }
     ss << std::endl;
     ss << "\t$(CC) -c $< -o $@" << std::endl << std::endl;

@@ -1,7 +1,7 @@
 CC = g++
 ODIR = obj
 PROG = gmake
-CXXFLAG = -lboost_system -lboost_filesystem
+CXXFLAG = -std=c++11 -lboost_system -lboost_filesystem
 
 $(PROG) : $(ODIR) $(ODIR)/$(PROG).o
 	$(CC) -o $@ $(ODIR)/$(PROG).o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/Graph.o $(CXXFLAG)
@@ -28,6 +28,7 @@ $(ODIR) :
 clean :
 	if [ -d $(ODIR) ]; then rm $(ODIR) -r; fi
 	if [ -f $(PROG) ]; then rm $(PROG); fi
+
 
 .PHONY : install
 install :
