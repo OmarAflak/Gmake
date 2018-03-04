@@ -31,12 +31,15 @@ bool endsWith(const std::string& str, const std::string& sub){
 bool readDeps(const char* filename, std::vector<std::string> &deps){
     std::ifstream file(filename);
     if(file){
+        std::string include = "#include\"";
+        int startPos = include.size();
+
         std::string line;
         while(!file.eof()){
             getline(file, line);
             eraseAll(line, " ");
-            if(startsWith(line, "#include\"")){
-                std::string dependency = line.substr(line.find("#include\"")+9);
+            if(startsWith(line, include)){
+                std::string dependency = line.substr(startPos, line.find("\"", startPos));
                 dependency = dependency.substr(0, dependency.size()-1);
                 deps.push_back(dependency);
             }
@@ -197,18 +200,20 @@ void help(){
 }
 
 int main(int argc, char const *argv[]) {
-    if(argc==2){
-        std::string entry = argv[1];
-        Graph graph = getDependencyGraph(".");
-        std::stringstream makefile = generateMakefile(graph, entry);
+    // if(argc==2){
+    //     std::string entry = argv[1];
+    //     Graph graph = getDependencyGraph(".");
+    //     std::stringstream makefile = generateMakefile(graph, entry);
+    //
+    //     std::ofstream out("Makefile");
+    //     out << makefile.str() << std::endl;
+    //     out.close();
+    // }
+    // else{
+    //     help();
+    // }
 
-        std::ofstream out("Makefile");
-        out << makefile.str() << std::endl;
-        out.close();
-    }
-    else{
-        help();
-    }
-    
+    Graph graph = getDependencyGraph(".");
+    graph.print();
     return 0;
 }
