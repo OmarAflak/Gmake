@@ -2,11 +2,19 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include <boost/filesystem.hpp>
+#include <algorithm>
 
+#include <boost/filesystem.hpp>
 #include "../Graph/include/Graph.h"
 
 using namespace boost::filesystem;
+
+struct less_connections{
+    inline bool operator() (Node const* node1, Node const* node2){
+        return (node1->getOutConnections() < node2->getOutConnections());
+    }
+};
+
 
 void eraseAll(std::string &str, const std::string& sub){
     int pos = 0;
@@ -101,25 +109,17 @@ Graph getDependencyGraph(const std::string& directory){
 
 std::vector<Node*> getOrderedDependencies(const Graph &graph){
     std::vector<Node*> nodes = graph.getNodes();
-    std::vector<Node*> ordered;
+    std::vector<Node*> headers;
 
     for(int i=0 ; i<nodes.size() ; i++){
         if(endsWith(nodes[i]->getName(), ".h")){
-            ordered.push_back(nodes[i]);
+            headers.push_back(nodes[i]);
         }
     }
 
-    for(int i=0 ; i<ordered.size() ; i++){
-        for(int j=i ; j<ordered.size() ; j++){
-            if(ordered[i]->getOutConnections()>ordered[j]->getOutConnections()){
-                Node* tmp = ordered[i];
-                ordered[i] = ordered[j];
-                ordered[j] = tmp;
-            }
-        }
-    }
+    std::sort(headers.begin(), headers.end(), less_connections());
 
-    return ordered;
+    return headers;
 }
 
 std::stringstream generateMakefile(const Graph& graph, const std::string& entryPoint){
@@ -212,6 +212,6 @@ int main(int argc, char const *argv[]) {
     else{
         help();
     }
-    
+
     return 0;
 }
