@@ -156,7 +156,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
                     ss << "$(ODIR)/" << path(dependency->getName()).stem().string() << ".o ";
                 }
                 ss << std::endl;
-                ss << "\t$(CC) -c $< -o $@" << std::endl << std::endl;
+                ss << "\t$(CC) -c $< -o $@ $(CXXFLAG)" << std::endl << std::endl;
                 break;
             }
         }
@@ -176,7 +176,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
         ss << "$(ODIR)/" << path(dep->getName()).stem().string() << ".o ";
     }
     ss << std::endl;
-    ss << "\t$(CC) -c $< -o $@" << std::endl << std::endl;
+    ss << "\t$(CC) -c $< -o $@ $(CXXFLAG)" << std::endl << std::endl;
 
     // mkdir
     ss << "$(ODIR) :" << std::endl;
