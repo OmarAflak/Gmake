@@ -31,4 +31,4 @@ clean :
 
 .PHONY : install
 install :
-	sudo mv gmake /bin
+	sudo cp gmake /bin
