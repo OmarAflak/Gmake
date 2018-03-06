@@ -15,7 +15,6 @@ struct less_connections{
     }
 };
 
-
 void eraseAll(std::string &str, const std::string& sub){
     int pos = 0;
     int length = sub.size();
@@ -25,15 +24,11 @@ void eraseAll(std::string &str, const std::string& sub){
 }
 
 bool startsWith(const std::string& str, const std::string& sub){
-    if(str.size()<sub.size())
-        return false;
-    return str.substr(0, sub.size())==sub;
+    return str.find(sub)==0;
 }
 
 bool endsWith(const std::string& str, const std::string& sub){
-    if(str.size()<sub.size())
-        return false;
-    return str.substr(str.size()-sub.size())==sub;
+    return (str.size() >= sub.size() && str.compare(str.size() - sub.size(), sub.size(), sub) == 0);
 }
 
 bool readDeps(const char* filename, std::vector<std::string> &deps){
@@ -47,8 +42,7 @@ bool readDeps(const char* filename, std::vector<std::string> &deps){
             getline(file, line);
             eraseAll(line, " ");
             if(startsWith(line, include)){
-                std::string dependency = line.substr(startPos, line.find("\"", startPos));
-                dependency = dependency.substr(0, dependency.size()-1);
+                std::string dependency = line.substr(startPos, line.find("\"", startPos)-startPos);
                 deps.push_back(dependency);
             }
         }
@@ -170,6 +164,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
             break;
         }
     }
+
     std::vector<Node*> entryDeps = graph.getOutConnections(entryNode->getName());
     ss << "$(ODIR)/$(PROG).o : " << entryNode->getName() << " ";
     for(const auto& dep : entryDeps){
