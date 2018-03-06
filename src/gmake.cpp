@@ -125,7 +125,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
     ss << "CC = g++" << std::endl;
     ss << "ODIR = obj" << std::endl;
     ss << "PROG = " << entryFilename.stem().string() << std::endl;
-    ss << "CXXFLAG = " << std::endl;
+    ss << "CXXFLAG = -std=c++11" << std::endl;
     ss << std::endl;
 
     // executable
