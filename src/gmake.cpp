@@ -9,12 +9,6 @@
 
 using namespace boost::filesystem;
 
-struct less_connections{
-    inline bool operator() (Node const* node1, Node const* node2){
-        return (node1->getOutConnections() < node2->getOutConnections());
-    }
-};
-
 void eraseAll(std::string &str, const std::string& sub){
     int pos = 0;
     int length = sub.size();
@@ -29,6 +23,10 @@ bool startsWith(const std::string& str, const std::string& sub){
 
 bool endsWith(const std::string& str, const std::string& sub){
     return (str.size() >= sub.size() && str.compare(str.size() - sub.size(), sub.size(), sub) == 0);
+}
+
+bool is_cpp(Node const* node){
+    return endsWith(node->getName(), ".cpp");
 }
 
 bool readDeps(const char* filename, std::vector<std::string> &deps){
@@ -86,7 +84,7 @@ Graph getDependencyGraph(const std::string& directory){
         std::vector<std::string> dependencies;
         std::string filepath = file.string();
         std::string extension = file.extension().string();
-        if(extension==".cpp" || extension==".h"){
+        if(extension==".cpp" || extension==".h" || extension==".hpp"){
             if(readDeps(filepath.c_str(), dependencies)){
                 for(const auto& dep : dependencies){
                     path p(dep);
@@ -101,77 +99,78 @@ Graph getDependencyGraph(const std::string& directory){
     return graph;
 }
 
-std::vector<Node*> getOrderedDependencies(const Graph &graph){
+std::vector<Node*> filterGraph(const Graph &graph, bool (*filter)(Node const*)){
     std::vector<Node*> nodes = graph.getNodes();
-    std::vector<Node*> headers;
-
+    std::vector<Node*> array;
     for(const auto& node : nodes){
-        if(endsWith(node->getName(), ".h")){
-            headers.push_back(node);
+        if(filter(node)){
+            array.push_back(node);
         }
     }
-
-    std::sort(headers.begin(), headers.end(), less_connections());
-    return headers;
+    return array;
 }
 
-std::stringstream generateMakefile(const Graph& graph, const std::string& entryPoint){
-    path entryFilename = path(entryPoint).filename();
-    std::vector<Node*> headers = getOrderedDependencies(graph);
+Node* getHeader(const Graph& graph, Node* cppNode){
+    std::vector<Node*> nodes = graph.getNodes();
+    std::string name = path(cppNode->getName()).stem().string();
+    std::string nameH = name+".h";
+    std::string nameHPP = name+".hpp";
+    for(const auto& node : nodes){
+        std::string str = path(node->getName()).filename().string();
+        if(str==nameH || str==nameHPP){
+            return node;
+        }
+    }
+    return nullptr;
+}
+
+std::stringstream generateMakefile(const Graph& graph, const std::string& main){
+    path mainPath = path(main);
+    std::vector<Node*> cpps = filterGraph(graph, is_cpp);
     std::vector<Node*> nodes = graph.getNodes();
     std::stringstream ss;
 
     // variables
     ss << "CC = g++" << std::endl;
     ss << "ODIR = obj" << std::endl;
-    ss << "PROG = " << entryFilename.stem().string() << std::endl;
+    ss << "PROG = " << mainPath.filename().stem().string() << std::endl;
     ss << "CXXFLAG = -std=c++11" << std::endl;
     ss << std::endl;
 
     // executable
-    ss << "$(PROG) : $(ODIR) $(ODIR)/$(PROG).o" << std::endl;
-    ss << "\t$(CC) -o $@ $(ODIR)/$(PROG).o ";
-    for(const auto& header : headers){
-        ss << "$(ODIR)/" << path(header->getName()).stem().string() << ".o ";
+    std::stringstream objs;
+    for(const auto& cpp : cpps){
+        objs << "$(ODIR)/" << path(cpp->getName()).stem().string() << ".o ";
     }
-    ss << "$(CXXFLAG)" << std::endl << std::endl;
+    ss << "$(PROG) : $(ODIR) " << objs.str() << std::endl;
+    ss << "\t$(CC) -o $@ " << objs.str() << "$(CXXFLAG)";
+    ss << std::endl << std::endl;
 
     // dependencies
-    for(const auto& header : headers){
-        std::string file = path(header->getName()).stem().string();
-        std::string cppName = file + ".cpp";
+    Node* mainNode = nullptr;
+    for(const auto& cpp : cpps){
+        std::vector<Node*> dependencies;
+        std::string cpp_filename = path(cpp->getName()).stem().string();
+        ss << "$(ODIR)/" << cpp_filename << ".o" << " : " << cpp->getName() << " ";
 
-        for(const auto& node : nodes){
-            if(path(node->getName()).filename().string()==cppName){
-                std::vector<Node*> deps = graph.getOutConnections(header->getName());
-                ss << "$(ODIR)/" << file << ".o" << " : ";
-                ss << node->getName() << " " << header->getName() << " ";
-                for(const auto& dependency : deps){
-                    ss << "$(ODIR)/" << path(dependency->getName()).stem().string() << ".o ";
-                }
-                ss << std::endl;
-                ss << "\t$(CC) -c $< -o $@ $(CXXFLAG)" << std::endl << std::endl;
-                break;
+        // cpp deps
+        dependencies = graph.getOutConnections(cpp->getName());
+        for(const auto& dep : dependencies){
+            ss << dep->getName() << " ";
+        }
+
+        // h deps
+        Node* header = getHeader(graph, cpp);
+        if(header){
+            dependencies = graph.getOutConnections(header->getName());
+            for(const auto& dep : dependencies){
+                ss << dep->getName() << " ";
             }
         }
-    }
 
-    // entry point
-    Node* entryNode = NULL;
-    for(const auto& node : nodes){
-        if(endsWith(node->getName(), entryPoint)){
-            entryNode = node;
-            break;
-        }
+        ss << std::endl;
+        ss << "\t$(CC) -c $< -o $@ $(CXXFLAG)" << std::endl << std::endl;
     }
-
-    std::vector<Node*> entryDeps = graph.getOutConnections(entryNode->getName());
-    ss << "$(ODIR)/$(PROG).o : " << entryNode->getName() << " ";
-    for(const auto& dep : entryDeps){
-        ss << "$(ODIR)/" << path(dep->getName()).stem().string() << ".o ";
-    }
-    ss << std::endl;
-    ss << "\t$(CC) -c $< -o $@ $(CXXFLAG)" << std::endl << std::endl;
 
     // mkdir
     ss << "$(ODIR) :" << std::endl;
@@ -187,15 +186,15 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& entryP
 }
 
 void help(){
-    std::cout << "gmake [entry]" << std::endl;
-    std::cout << "\t[entry] : file containing the main() function" << std::endl;
+    std::cout << "gmake [main]" << std::endl;
+    std::cout << "\t[main] : file containing the main() function" << std::endl;
 }
 
 int main(int argc, char const *argv[]) {
     if(argc==2){
-        std::string entry = argv[1];
+        std::string main = argv[1];
         Graph graph = getDependencyGraph(".");
-        std::stringstream makefile = generateMakefile(graph, entry);
+        std::stringstream makefile = generateMakefile(graph, main);
 
         std::ofstream out("Makefile");
         out << makefile.str() << std::endl;
