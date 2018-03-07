@@ -30,4 +30,5 @@ clean :
 	if [ -f $(PROG) ]; then rm $(PROG); fi
 
 .PHONY : install
+install :
 	sudo cp gmake /bin/gmake
