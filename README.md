@@ -2,7 +2,7 @@
 
 gmake is a Makefile generator for simple C++ projects.
 
-# Install dependency
+# Dependencies
 
 ```
 sudo apt install libboost-dev libboost-all-dev
@@ -21,5 +21,5 @@ make install
 
 ```
 cd ./your/cpp/project
-gmake exec_name
+gmake -x exec_name
 ```
