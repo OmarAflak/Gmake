@@ -6,6 +6,7 @@
 
 #include <boost/filesystem.hpp>
 #include "../Graph/include/Graph.h"
+#include "../include/parser.h"
 
 using namespace boost::filesystem;
 
@@ -194,14 +195,14 @@ bool saveMakefile(const std::stringstream &makefile){
 }
 
 void help(){
-    std::cout << "usage : gmake <executable_name>" << std::endl;
+    std::cout << "Usage : gmake -o <executable_name>" << std::endl;
 }
 
 int main(int argc, char const *argv[]) {
-    bool ok = false;
-    if(argc==2){
+    if(hasArg("-o", argc, argv)){
+        std::string output = getArg("-o", argc, argv);
         Graph graph = getDependencyGraph(".");
-        std::stringstream makefile = generateMakefile(graph, argv[1]);
+        std::stringstream makefile = generateMakefile(graph, output);
         if(!saveMakefile(makefile)){
             std::cerr << "Could not write Makefile." << std::endl;
             return 1;

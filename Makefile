@@ -3,8 +3,8 @@ ODIR = obj
 PROG = gmake
 CXXFLAG = -std=c++11 -lboost_system -lboost_filesystem
 
-$(PROG) : $(ODIR) $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o
-	$(CC) -o $@ $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(CXXFLAG)
+$(PROG) : $(ODIR) $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(ODIR)/parser.o
+	$(CC) -o $@ $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(ODIR)/parser.o $(CXXFLAG)
 
 $(ODIR)/Graph.o : ./Graph/src/Graph.cpp ./Graph/include/Graph.h ./Graph/include/Vertex.h ./Graph/include/Utils.h
 	$(CC) -c $< -o $@ $(CXXFLAG)
@@ -18,7 +18,10 @@ $(ODIR)/Node.o : ./Graph/src/Node.cpp ./Graph/include/Node.h
 $(ODIR)/Vertex.o : ./Graph/src/Vertex.cpp ./Graph/include/Vertex.h ./Graph/include/Node.h
 	$(CC) -c $< -o $@ $(CXXFLAG)
 
-$(ODIR)/gmake.o : ./src/gmake.cpp ./Graph/include/Graph.h
+$(ODIR)/gmake.o : ./src/gmake.cpp ./Graph/include/Graph.h ./include/parser.h
+	$(CC) -c $< -o $@ $(CXXFLAG)
+
+$(ODIR)/parser.o : ./src/parser.cpp ./include/parser.h
 	$(CC) -c $< -o $@ $(CXXFLAG)
 
 $(ODIR) :
