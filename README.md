@@ -16,3 +16,10 @@ git submodule update --init
 make
 make install
 ```
+
+# Use gmake
+
+```
+cd ./your/cpp/project
+gmake exec_name
+```
