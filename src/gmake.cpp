@@ -184,8 +184,8 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
     return ss;
 }
 
-bool saveMakefile(const std::stringstream &makefile){
-    std::ofstream out("Makefile");
+bool saveMakefile(const char* filepath, const std::stringstream& makefile){
+    std::ofstream out(filepath);
     if(out){
         out << makefile.str() << std::endl;
         out.close();
@@ -195,15 +195,16 @@ bool saveMakefile(const std::stringstream &makefile){
 }
 
 void help(){
-    std::cout << "Usage : gmake -o <executable_name>" << std::endl;
+    std::cout << "Usage: gmake [options]" << std::endl;
+    std::cout << "  -x\texecutable name" << std::endl;
 }
 
 int main(int argc, char const *argv[]) {
-    if(hasArg("-o", argc, argv)){
-        std::string output = getArg("-o", argc, argv);
+    if(hasArg("-x", argc, argv)){
+        std::string executable = getArg("-x", argc, argv);
         Graph graph = getDependencyGraph(".");
-        std::stringstream makefile = generateMakefile(graph, output);
-        if(!saveMakefile(makefile)){
+        std::stringstream makefile = generateMakefile(graph, executable);
+        if(!saveMakefile("Makefile", makefile)){
             std::cerr << "Could not write Makefile." << std::endl;
             return 1;
         }
