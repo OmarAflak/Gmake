@@ -124,8 +124,7 @@ Node* getHeader(const Graph& graph, Node* cppNode){
     return nullptr;
 }
 
-std::stringstream generateMakefile(const Graph& graph, const std::string& main){
-    path mainPath = path(main);
+std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
     std::vector<Node*> cpps = filterGraph(graph, is_cpp);
     std::vector<Node*> nodes = graph.getNodes();
     std::stringstream ss;
@@ -133,7 +132,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& main){
     // variables
     ss << "CC = g++" << std::endl;
     ss << "ODIR = obj" << std::endl;
-    ss << "PROG = " << mainPath.filename().stem().string() << std::endl;
+    ss << "PROG = " << exec << std::endl;
     ss << "CXXFLAG = -std=c++11" << std::endl;
     ss << std::endl;
 
@@ -147,11 +146,10 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& main){
     ss << std::endl << std::endl;
 
     // dependencies
-    Node* mainNode = nullptr;
     for(const auto& cpp : cpps){
         std::vector<Node*> dependencies;
         std::string cpp_filename = path(cpp->getName()).stem().string();
-        ss << "$(ODIR)/" << cpp_filename << ".o" << " : " << cpp->getName() << " ";
+        ss << "$(ODIR)/" << cpp_filename << ".o : " << cpp->getName() << " ";
 
         // cpp deps
         dependencies = graph.getOutConnections(cpp->getName());
@@ -185,20 +183,29 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& main){
     return ss;
 }
 
+bool saveMakefile(const std::stringstream &makefile){
+    std::ofstream out("Makefile");
+    if(out){
+        out << makefile.str() << std::endl;
+        out.close();
+        return true;
+    }
+    return false;
+}
+
 void help(){
-    std::cout << "gmake [main]" << std::endl;
-    std::cout << "\t[main] : file containing the main() function" << std::endl;
+    std::cout << "usage : gmake <executable_name>" << std::endl;
 }
 
 int main(int argc, char const *argv[]) {
+    bool ok = false;
     if(argc==2){
-        std::string main = argv[1];
         Graph graph = getDependencyGraph(".");
-        std::stringstream makefile = generateMakefile(graph, main);
-
-        std::ofstream out("Makefile");
-        out << makefile.str() << std::endl;
-        out.close();
+        std::stringstream makefile = generateMakefile(graph, argv[1]);
+        if(!saveMakefile(makefile)){
+            std::cerr << "Could not write Makefile." << std::endl;
+            return 1;
+        }
     }
     else{
         help();
