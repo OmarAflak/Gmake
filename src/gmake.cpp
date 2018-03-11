@@ -111,20 +111,6 @@ std::vector<Node*> filterGraph(const Graph &graph, bool (*filter)(Node const*)){
     return array;
 }
 
-Node* getHeader(const Graph& graph, Node* cppNode){
-    std::vector<Node*> nodes = graph.getNodes();
-    std::string name = path(cppNode->getName()).stem().string();
-    std::string nameH = name+".h";
-    std::string nameHPP = name+".hpp";
-    for(const auto& node : nodes){
-        std::string str = path(node->getName()).filename().string();
-        if(str==nameH || str==nameHPP){
-            return node;
-        }
-    }
-    return nullptr;
-}
-
 std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
     std::vector<Node*> cpps = filterGraph(graph, is_cpp);
     std::vector<Node*> nodes = graph.getNodes();
@@ -156,15 +142,6 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
         dependencies = graph.getOutConnections(cpp->getName());
         for(const auto& dep : dependencies){
             ss << dep->getName() << " ";
-        }
-
-        // h deps
-        Node* header = getHeader(graph, cpp);
-        if(header){
-            dependencies = graph.getOutConnections(header->getName());
-            for(const auto& dep : dependencies){
-                ss << dep->getName() << " ";
-            }
         }
 
         ss << std::endl;
