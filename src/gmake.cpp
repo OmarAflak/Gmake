@@ -86,6 +86,7 @@ Graph getDependencyGraph(const std::string& directory){
         std::string filepath = file.string();
         std::string extension = file.extension().string();
         if(extension==".cpp" || extension==".h" || extension==".hpp"){
+            graph.addNode(filepath);
             if(readDeps(filepath.c_str(), dependencies)){
                 for(const auto& dep : dependencies){
                     path p(dep);
