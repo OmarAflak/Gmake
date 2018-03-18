@@ -1,7 +1,7 @@
 CC = g++
 ODIR = obj
 PROG = gmake
-CXXFLAG = -std=c++11 -lboost_system -lboost_filesystem
+CXXFLAG = -std=c++17 -lstdc++fs
 
 $(PROG) : $(ODIR) $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(ODIR)/parser.o
 	$(CC) -o $@ $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(ODIR)/parser.o $(CXXFLAG)
