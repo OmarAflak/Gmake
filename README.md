@@ -2,12 +2,6 @@
 
 gmake is a Makefile generator for simple C++ projects.
 
-# Dependencies
-
-```
-sudo apt install libboost-dev libboost-all-dev
-```
-
 # Install gmake
 
 ```
