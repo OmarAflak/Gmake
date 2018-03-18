@@ -4,11 +4,11 @@
 #include <sstream>
 #include <algorithm>
 
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 #include "../Graph/include/Graph.h"
 #include "../include/parser.h"
 
-using namespace boost::filesystem;
+namespace fs = std::experimental::filesystem;
 
 void eraseAll(std::string &str, const std::string& sub){
     int pos = 0;
@@ -51,17 +51,17 @@ bool readDeps(const char* filename, std::vector<std::string> &deps){
     return false;
 }
 
-std::vector<path> listdir(const std::string& dir){
-    path p(dir);
-    directory_iterator end_itr;
-    std::vector<path> list;
+std::vector<fs::path> listdir(const std::string& dir){
+    fs::path p(dir);
+    fs::directory_iterator end_itr;
+    std::vector<fs::path> list;
 
-    for (directory_iterator itr(p); itr != end_itr; ++itr){
+    for (fs::directory_iterator itr(p); itr != end_itr; ++itr){
         if (is_regular_file(itr->path())) {
             list.push_back(itr->path());
         }
         else{
-            std::vector<path> subdir = listdir(itr->path().string());
+            std::vector<fs::path> subdir = listdir(itr->path().string());
             list.insert(list.end(), subdir.begin(), subdir.end());
         }
     }
@@ -69,7 +69,7 @@ std::vector<path> listdir(const std::string& dir){
     return list;
 }
 
-int findPath(const std::vector<path> &paths, const std::string &dep){
+int findPath(const std::vector<fs::path> &paths, const std::string &dep){
     for(int i=0 ; i<paths.size() ; i++){
         if(paths[i].filename().string()==dep){
             return i;
@@ -80,7 +80,7 @@ int findPath(const std::vector<path> &paths, const std::string &dep){
 
 Graph getDependencyGraph(const std::string& directory){
     Graph graph;
-    std::vector<path> paths = listdir(directory);
+    std::vector<fs::path> paths = listdir(directory);
     for(const auto& file : paths){
         std::vector<std::string> dependencies;
         std::string filepath = file.string();
@@ -89,7 +89,7 @@ Graph getDependencyGraph(const std::string& directory){
             graph.addNode(filepath);
             if(readDeps(filepath.c_str(), dependencies)){
                 for(const auto& dep : dependencies){
-                    path p(dep);
+                    fs::path p(dep);
                     int index = findPath(paths, p.filename().string());
                     if(index!=-1){
                         graph.connect(filepath, paths[index].string());
@@ -113,11 +113,11 @@ std::vector<Node*> filterGraph(const Graph &graph, bool (*filter)(Node const*)){
 }
 
 Node* getHeader(const std::vector<Node*> &dependencies, const Node& cppNode){
-    std::string name = path(cppNode.getName()).stem().string();
+    std::string name = fs::path(cppNode.getName()).stem().string();
     std::string nameH = name+".h";
     std::string nameHPP = name+".hpp";
     for(const auto& node : dependencies){
-        std::string str = path(node->getName()).filename().string();
+        std::string str = fs::path(node->getName()).filename().string();
         if(str==nameH || str==nameHPP){
             return node;
         }
@@ -151,7 +151,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
     // executable
     std::stringstream objs;
     for(const auto& cpp : cpps){
-        objs << "$(ODIR)/" << path(cpp->getName()).stem().string() << ".o ";
+        objs << "$(ODIR)/" << fs::path(cpp->getName()).stem().string() << ".o ";
     }
     ss << "$(PROG) : $(ODIR) " << objs.str() << std::endl;
     ss << "\t$(CC) -o $@ " << objs.str() << "$(CXXFLAG)";
@@ -160,7 +160,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
     // dependencies
     for(const auto& cpp : cpps){
         std::vector<Node*> dependencies;
-        std::string cpp_filename = path(cpp->getName()).stem().string();
+        std::string cpp_filename = fs::path(cpp->getName()).stem().string();
         ss << "$(ODIR)/" << cpp_filename << ".o : " << cpp->getName() << " ";
 
         // cpp deps
