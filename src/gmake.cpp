@@ -9,7 +9,6 @@
 namespace fs = std::experimental::filesystem;
 
 static const std::vector<std::string> EXTS_SRC = {".cpp", ".c++"};
-static const std::vector<std::string> EXTS_HDR = {".hpp", ".h"};
 static const std::string INCLUDE_STMT = "#include";
 static const std::string INCLUDE_L_DLMTR = "\"";
 static const std::string INCLUDE_R_DLMTR = "\"";
