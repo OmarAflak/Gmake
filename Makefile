@@ -1,28 +1,29 @@
 CC = g++
 ODIR = obj
 PROG = gmake
-CXXFLAG = -std=c++17 -lstdc++fs
+CXXFLAGS = -std=c++17 -lstdc++fs
 
-$(PROG) : $(ODIR) $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(ODIR)/parser.o
-	$(CC) -o $@ $(ODIR)/Graph.o $(ODIR)/Utils.o $(ODIR)/Node.o $(ODIR)/Vertex.o $(ODIR)/gmake.o $(ODIR)/parser.o $(CXXFLAG)
+OBJS = $(ODIR)/edge.o $(ODIR)/graph.o $(ODIR)/node.o $(ODIR)/utils.o $(ODIR)/gmake.o $(ODIR)/parser.o
+$(PROG) : $(ODIR) $(OBJS)
+	$(CC) -o $@ $(OBJS) $(CXXFLAGS)
 
-$(ODIR)/Graph.o : ./Graph/src/Graph.cpp ./Graph/include/Graph.h ./Graph/include/Vertex.h ./Graph/include/Node.h ./Graph/include/Utils.h
-	$(CC) -c $< -o $@ $(CXXFLAG)
+$(ODIR)/edge.o : ./Graph/src/edge.cpp ./Graph/include/edge.h ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h
+	$(CC) -c $< -o $@ $(CXXFLAGS)
 
-$(ODIR)/Utils.o : ./Graph/src/Utils.cpp ./Graph/include/Utils.h
-	$(CC) -c $< -o $@ $(CXXFLAG)
+$(ODIR)/graph.o : ./Graph/src/graph.cpp ./Graph/include/graph.h ./Graph/include/graphEntry.h ./Graph/include/edge.h ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h
+	$(CC) -c $< -o $@ $(CXXFLAGS)
 
-$(ODIR)/Node.o : ./Graph/src/Node.cpp ./Graph/include/Node.h
-	$(CC) -c $< -o $@ $(CXXFLAG)
+$(ODIR)/node.o : ./Graph/src/node.cpp ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h
+	$(CC) -c $< -o $@ $(CXXFLAGS)
 
-$(ODIR)/Vertex.o : ./Graph/src/Vertex.cpp ./Graph/include/Vertex.h ./Graph/include/Node.h
-	$(CC) -c $< -o $@ $(CXXFLAG)
+$(ODIR)/utils.o : ./Graph/src/utils.cpp ./Graph/include/utils.h
+	$(CC) -c $< -o $@ $(CXXFLAGS)
 
-$(ODIR)/gmake.o : ./src/gmake.cpp ./Graph/include/Graph.h ./include/parser.h
-	$(CC) -c $< -o $@ $(CXXFLAG)
+$(ODIR)/gmake.o : ./src/gmake.cpp ./Graph/include/graph.h ./Graph/include/graphEntry.h ./Graph/include/edge.h ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h ./include/parser.h
+	$(CC) -c $< -o $@ $(CXXFLAGS)
 
 $(ODIR)/parser.o : ./src/parser.cpp ./include/parser.h
-	$(CC) -c $< -o $@ $(CXXFLAG)
+	$(CC) -c $< -o $@ $(CXXFLAGS)
 
 $(ODIR) :
 	if [ ! -d $(ODIR) ]; then mkdir $(ODIR); fi
