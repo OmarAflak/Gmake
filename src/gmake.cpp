@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <functional>
 #include <experimental/filesystem>
 
 #include "../Graph/include/graph.h"
@@ -8,6 +9,7 @@
 
 namespace fs = std::experimental::filesystem;
 
+static const std::vector<std::string> EXTS_HDR = {".hpp", ".h"};
 static const std::vector<std::string> EXTS_SRC = {".cpp", ".c++", ".cxx", ".cp", ".cc"};
 static const std::string INCLUDE_STMT = "#include";
 static const std::string INCLUDE_L_DLMTR = "\"";
@@ -92,7 +94,7 @@ int findPath(const std::vector<fs::path> &paths, const std::string &dep){
     return -1;
 }
 
-std::vector<GraphEntry> filterGraph(const Graph &graph, bool (*filter)(GraphEntry const*)){
+std::vector<GraphEntry> filterGraph(const Graph &graph, std::function<bool(GraphEntry const*)> filter){
     std::map<std::string, GraphEntry> all = graph.getAllData();
     std::vector<GraphEntry> filtered;
     for(const auto& pair : all){
