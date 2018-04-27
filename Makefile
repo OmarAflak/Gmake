@@ -8,22 +8,22 @@ $(PROG) : $(ODIR) $(OBJS)
 	$(CC) -o $@ $(OBJS) $(CXXFLAGS)
 
 $(ODIR)/edge.o : ./Graph/src/edge.cpp ./Graph/include/edge.h ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h
-	$(CC) -c $< -o $@ $(CXXFLAGS)
+	$(CC) -c ./Graph/src/edge.cpp -o $@ $(CXXFLAGS)
 
 $(ODIR)/graph.o : ./Graph/src/graph.cpp ./Graph/include/graph.h ./Graph/include/graphEntry.h ./Graph/include/edge.h ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h
-	$(CC) -c $< -o $@ $(CXXFLAGS)
+	$(CC) -c ./Graph/src/graph.cpp -o $@ $(CXXFLAGS)
 
 $(ODIR)/node.o : ./Graph/src/node.cpp ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h
-	$(CC) -c $< -o $@ $(CXXFLAGS)
+	$(CC) -c ./Graph/src/node.cpp -o $@ $(CXXFLAGS)
 
 $(ODIR)/utils.o : ./Graph/src/utils.cpp ./Graph/include/utils.h
-	$(CC) -c $< -o $@ $(CXXFLAGS)
+	$(CC) -c ./Graph/src/utils.cpp -o $@ $(CXXFLAGS)
 
 $(ODIR)/gmake.o : ./src/gmake.cpp ./Graph/include/graph.h ./Graph/include/graphEntry.h ./Graph/include/edge.h ./Graph/include/node.h ./Graph/include/dataInterface.h ./Graph/include/utils.h ./include/parser.h
-	$(CC) -c $< -o $@ $(CXXFLAGS)
+	$(CC) -c ./src/gmake.cpp -o $@ $(CXXFLAGS)
 
 $(ODIR)/parser.o : ./src/parser.cpp ./include/parser.h
-	$(CC) -c $< -o $@ $(CXXFLAGS)
+	$(CC) -c ./src/parser.cpp -o $@ $(CXXFLAGS)
 
 $(ODIR) :
 	if [ ! -d $(ODIR) ]; then mkdir $(ODIR); fi

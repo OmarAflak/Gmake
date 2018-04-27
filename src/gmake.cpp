@@ -170,11 +170,13 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
         // src deps
         std::vector<GraphEntry> deps = getDeepDependencies(all, src);
         for(const auto& d : deps){
-            ss << d.mNode->getUid() << " ";
+            if(d.mNode->getUid()!=src.mNode->getUid()){
+                ss << d.mNode->getUid() << " ";
+            }
         }
 
         ss << std::endl;
-        ss << "\t$(CC) -c $< -o $@ $(CXXFLAGS)" << std::endl << std::endl;
+        ss << "\t$(CC) -c " << src.mNode->getUid() << " -o $@ $(CXXFLAGS)" << std::endl << std::endl;
     }
 
     // mkdir
