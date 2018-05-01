@@ -1,6 +1,6 @@
 # gmake
 
-gmake is a Makefile generator for simple C++ projects.
+gmake is a Makefile generator for simple C/C++ projects.
 
 # Install gmake
 
