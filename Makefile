@@ -1,7 +1,7 @@
 CC = g++
 ODIR = obj
 PROG = gmake
-CXXFLAGS = -Wall -Wextra -g -std=c++17 -lstdc++fs
+CXXFLAGS = -Wall -Wextra -std=c++17 -lstdc++fs
 
 OBJS = $(ODIR)/edge.o $(ODIR)/graph.o $(ODIR)/node.o $(ODIR)/utils.o $(ODIR)/gmake.o $(ODIR)/parser.o
 $(PROG) : $(ODIR) $(OBJS)
