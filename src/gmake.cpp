@@ -87,7 +87,7 @@ bool readFileDependencies(const char* filename, std::vector<std::string> &deps){
 }
 
 int findPath(const std::vector<fs::path> &paths, const std::string &dep){
-    for(int i=0 ; i<paths.size() ; i++){
+    for(unsigned int i=0 ; i<paths.size() ; i++){
         if(paths[i].filename().string()==dep){
             return i;
         }
