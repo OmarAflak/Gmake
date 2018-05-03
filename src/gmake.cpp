@@ -149,7 +149,7 @@ std::stringstream generateMakefile(const Graph& graph, const std::string& exec){
     ss << "CC = g++" << std::endl;
     ss << "ODIR = obj" << std::endl;
     ss << "PROG = " << exec << std::endl;
-    ss << "CXXFLAGS = -std=c++11" << std::endl;
+    ss << "CXXFLAGS = -Wall -Wextra -std=c++11" << std::endl;
     ss << std::endl;
 
     // executable
